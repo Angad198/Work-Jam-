@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Dashboard</title>
+  <link rel="stylesheet" href="Style.css">
+</head>
+
+<body>
+
+  <div class="dashboard">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2>Employee</h2>
+      <a href="#">Dashboard</a>
+      <a href="Index.html">Logout</a>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+      <h1>My Shift Dashboard 👷</h1>
+
+      <!-- Clock Section -->
+      <div class="card-box">
+        <h3>Clock In / Clock Out</h3>
+
+        <button onclick="clockIn()">Clock In ⏱️</button>
+        <button onclick="clockOut()">Clock Out ⏹️</button>
+
+        <p id="clockMsg"></p>
+      </div>
+
+      <!-- Attendance -->
+      <div class="card-box">
+        <h3>My Attendance</h3>
+        <ul id="attendanceList"></ul>
+      </div>
+      <!-- My Shifts -->
+<div class="card-box">
+  <h3>My Shifts</h3>
+  <ul id="myShifts"></ul>
+</div>
+
+    </div>
+
+  </div>
+  
+
+  <script src="Script.js"></script>
+</body>
+</html>
