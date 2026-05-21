@@ -1,36 +1,43 @@
+// ================= CONFIG =================
+const API = "http://127.0.0.1:5000";
 
-// ================= GLOBAL USER =================
 let username = localStorage.getItem("username");
 let role = localStorage.getItem("role");
 
 
-// ================= LOGIN =================
+// ================= AUTH =================
 function login() {
   let user = document.getElementById("username").value;
   let pass = document.getElementById("password").value;
   let msg = document.getElementById("msg");
 
-  if (user === "" || pass === "") {
+  if (!user || !pass) {
     msg.innerText = "Please fill all fields";
     return;
   }
 
-  if (user === "admin" && pass === "1234") {
-    localStorage.setItem("role", "admin");
-    localStorage.setItem("username", "admin");
+  fetch(`${API}/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: user, password: pass })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (!data.role) {
+        msg.style.color = "red";
+        msg.innerText = "Invalid credentials";
+        return;
+      }
 
-    window.location.href = "admin.html";
-  } 
-  else if (user === "emp" && pass === "1234") {
-    localStorage.setItem("role", "employee");
-    localStorage.setItem("username", "emp");
+      localStorage.setItem("username", data.username || user);
+      localStorage.setItem("role", data.role);
 
-    window.location.href = "employee.html";
-  } 
-  else {
-    msg.style.color = "red";
-    msg.innerText = "Invalid credentials";
-  }
+      window.location.href =
+        data.role === "admin" ? "admin.html" : "employee.html";
+    })
+    .catch(() => {
+      msg.innerText = "Server not running";
+    });
 }
 
 
@@ -40,45 +47,90 @@ function addEmployee() {
   let role = document.getElementById("empRole").value;
   let msg = document.getElementById("msg");
 
-  if (name === "" || role === "") {
+  if (!name || !role) {
     msg.innerText = "Please fill all fields";
     return;
   }
 
-  let employees = JSON.parse(localStorage.getItem("employees")) || [];
-
-  let employee = {
-    id: Date.now(),
-    name: name,
-    role: role
-  };
-
-  employees.push(employee);
-
-  localStorage.setItem("employees", JSON.stringify(employees));
-
-  msg.style.color = "green";
-  msg.innerText = "Employee added ✔";
-
-  document.getElementById("empName").value = "";
-  document.getElementById("empRole").value = "";
-
-  displayEmployees();
+  fetch(`${API}/employees`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, role })
+  }).then(() => {
+    msg.style.color = "green";
+    msg.innerText = "Employee added ✔";
+    displayEmployees();
+    loadEmployeeDropdown();
+  });
 }
 
 function displayEmployees() {
-  let employees = JSON.parse(localStorage.getItem("employees")) || [];
-  let list = document.getElementById("empList");
+  fetch(`${API}/employees`)
+    .then(r => r.json())
+    .then(data => {
+      let list = document.getElementById("empList");
+      if (!list) return;
 
-  if (!list) return;
+      list.innerHTML = data
+        .map(e => `<li>${e.name} - ${e.role}</li>`)
+        .join("");
+    });
+}
 
-  list.innerHTML = "";
 
-  employees.forEach(emp => {
-    list.innerHTML += `
-      <li>${emp.name} - ${emp.role}</li>
-    `;
+// ================= SHIFTS =================
+function addShift() {
+  let emp = document.getElementById("shiftEmp").value;
+  let date = document.getElementById("shiftDate").value;
+  let start = document.getElementById("shiftStart").value;
+  let end = document.getElementById("shiftEnd").value;
+  let msg = document.getElementById("shiftMsg");
+
+  if (!emp || !date || !start || !end) {
+    msg.innerText = "Please fill all fields";
+    msg.style.color = "red";
+    return;
+  }
+
+  fetch(`${API}/shifts`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ employee: emp, date, start, end })
+  }).then(() => {
+    msg.style.color = "green";
+    msg.innerText = "Shift assigned ✔";
+    showAllShifts();
+    loadMyShifts();
   });
+}
+
+function showAllShifts() {
+  fetch(`${API}/shifts`)
+    .then(r => r.json())
+    .then(data => {
+      let list = document.getElementById("allShifts");
+      if (!list) return;
+
+      list.innerHTML = data
+        .map(s =>
+          `<li>${s.employee} | ${s.date} | ${s.start}-${s.end}</li>`
+        )
+        .join("");
+    });
+}
+
+function loadMyShifts() {
+  fetch(`${API}/shifts`)
+    .then(r => r.json())
+    .then(data => {
+      let list = document.getElementById("myShifts");
+      if (!list) return;
+
+      list.innerHTML = data
+        .filter(s => s.employee === username)
+        .map(s => `<li>${s.date} | ${s.start} - ${s.end}</li>`)
+        .join("");
+    });
 }
 
 
@@ -92,134 +144,119 @@ function clockOut() {
 }
 
 function saveAttendance(type) {
-  let time = new Date().toLocaleTimeString();
-
-  let attendance = JSON.parse(localStorage.getItem("attendance")) || [];
-
-  attendance.push({
-    user: username,
-    type: type,
-    time: time,
-    date: new Date().toLocaleDateString()
-  });
-
-  localStorage.setItem("attendance", JSON.stringify(attendance));
-
-  let msg = document.getElementById("clockMsg");
-  if (msg) {
-    msg.innerText = `${type} at ${time}`;
-  }
-
-  showAttendance();
+  fetch(`${API}/attendance`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      user: username,
+      type,
+      time: new Date().toLocaleTimeString(),
+      date: new Date().toLocaleDateString()
+    })
+  }).then(showAttendance);
 }
 
 function showAttendance() {
-  let attendance = JSON.parse(localStorage.getItem("attendance")) || [];
-  let list = document.getElementById("attendanceList");
+  fetch(`${API}/attendance`)
+    .then(r => r.json())
+    .then(data => {
+      let list = document.getElementById("attendanceList");
+      if (!list) return;
 
-  if (!list) return;
-
-  list.innerHTML = "";
-
-  attendance.forEach(item => {
-    if (item.user === username) {
-      list.innerHTML += `
-        <li>${item.date} - ${item.type} - ${item.time}</li>
-      `;
-    }
-  });
+      list.innerHTML = data
+        .filter(i => i.user === username)
+        .map(i => `<li>${i.date} | ${i.type} | ${i.time}</li>`)
+        .join("");
+    });
 }
 
 
-// ================= EMPLOYEE DASHBOARD =================
-function loadEmployeeName() {
-  let display = document.getElementById("empName");
-
-  if (display) {
-    display.innerText = "Welcome " + username;
-  }
-}
-
-
-// ================= MY SHIFTS =================
-function loadMyShifts() {
-  let shifts = JSON.parse(localStorage.getItem("shifts")) || [];
-  let list = document.getElementById("myShifts");
-
-  if (!list) return;
-
-  list.innerHTML = "";
-
-  shifts.forEach(shift => {
-    if (shift.employee === username) {
-      list.innerHTML += `
-        <li>
-          📅 ${shift.date} | ⏰ ${shift.start} - ${shift.end}
-        </li>
-      `;
-    }
-  });
-}
-
-
-// ================= PAGE LOAD =================
-window.onload = function () {
-  loadEmployeeName();
-  showAttendance();
-  loadMyShifts();
-  loadEmployeeDropdown(); // ⭐ IMPORTANT FIX
-};
-
-
-///   ================= SHIFTS (ADMIN) =================
-function addShift() {
-  let emp = document.getElementById("shiftEmp").value;
-  let date = document.getElementById("shiftDate").value;
-  let start = document.getElementById("shiftStart").value;
-  let end = document.getElementById("shiftEnd").value;
-
-  let msg = document.getElementById("shiftMsg");
-
-  if (emp === "" || date === "" || start === "" || end === "") {
-    msg.innerText = "Please fill all fields";
-    msg.style.color = "red";
-    return;
-  }
-
-  let shifts = JSON.parse(localStorage.getItem("shifts")) || [];
-
-  shifts.push({
-    employee: emp,
-    date: date,
-    start: start,
-    end: end
-  });
-
-  localStorage.setItem("shifts", JSON.stringify(shifts));
-
-  msg.style.color = "green";
-  msg.innerText = "Shift assigned ✔";
-
-  // clear fields
-  document.getElementById("shiftDate").value = "";
-  document.getElementById("shiftStart").value = "";
-  document.getElementById("shiftEnd").value = "";
-}
-
-/// Load employees into dropdown//
+// ================= DROPDOWN =================
 function loadEmployeeDropdown() {
-  let employees = JSON.parse(localStorage.getItem("employees")) || [];
-  let dropdown = document.getElementById("shiftEmp");
+  fetch(`${API}/employees`)
+    .then(r => r.json())
+    .then(data => {
+      let dropdown = document.getElementById("shiftEmp");
+      if (!dropdown) return;
 
-  if (!dropdown) return;
-
-  dropdown.innerHTML = "";
-
-  employees.forEach(emp => {
-    dropdown.innerHTML += `
-      <option value="${emp.name}">
-        ${emp.name}
-      </option>
-    `;
-  });
+      dropdown.innerHTML = data
+        .map(e => `<option value="${e.name}">${e.name}</option>`)
+        .join("");
+    });
 }
+
+
+// ================= SHIFT REQUESTS =================
+function requestShiftSwap() {
+  let reason = document.getElementById("swapReason").value;
+  if (!reason) return alert("Enter reason");
+
+  let requests = JSON.parse(localStorage.getItem("shiftRequests")) || [];
+
+  requests.push({
+    id: Date.now(),
+    employee: username,
+    reason,
+    status: "Pending"
+  });
+
+  localStorage.setItem("shiftRequests", JSON.stringify(requests));
+  loadMyRequests();
+}
+
+function loadMyRequests() {
+  let requests = JSON.parse(localStorage.getItem("shiftRequests")) || [];
+  let list = document.getElementById("myRequests");
+  if (!list) return;
+
+  list.innerHTML = requests
+    .filter(r => r.employee === username)
+    .map(r => `<li>${r.reason} | ${r.status}</li>`)
+    .join("");
+}
+
+function loadAllRequests() {
+  let requests = JSON.parse(localStorage.getItem("shiftRequests")) || [];
+  let list = document.getElementById("allRequests");
+  if (!list) return;
+
+  list.innerHTML = requests
+    .map(r => `
+      <li>
+        ${r.employee} | ${r.reason} | ${r.status}
+        <button onclick="approveRequest(${r.id})">Approve</button>
+        <button onclick="rejectRequest(${r.id})">Reject</button>
+      </li>
+    `).join("");
+}
+
+function approveRequest(id) {
+  updateRequest(id, "Approved");
+}
+
+function rejectRequest(id) {
+  updateRequest(id, "Rejected");
+}
+
+function updateRequest(id, status) {
+  let requests = JSON.parse(localStorage.getItem("shiftRequests")) || [];
+
+  requests = requests.map(r =>
+    r.id === id ? { ...r, status } : r
+  );
+
+  localStorage.setItem("shiftRequests", JSON.stringify(requests));
+  loadAllRequests();
+}
+
+
+// ================= PAGE INIT =================
+window.onload = function () {
+  displayEmployees();
+  showAllShifts();
+  loadMyShifts();
+  showAttendance();
+  loadEmployeeDropdown();
+  loadMyRequests();
+  loadAllRequests();
+};
