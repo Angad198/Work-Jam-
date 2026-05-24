@@ -91,9 +91,11 @@ Clone of Workjam/
 ## 🎥 Demo Video
 ## 🎥 Demo Video
 
+## 🎥 Demo Video
+
 Watch the project demo below:
 
-[▶ Watch Demo Video](./frontend/public/demo.mp4)
+[▶ Watch Demo Video](./frontend/public/Demo Video.gif)
 
 ## ⚙️ Installation & Setup
 
