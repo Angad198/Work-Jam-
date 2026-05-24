@@ -88,14 +88,13 @@ Clone of Workjam/
 
 ---
 
-## 🎥 Demo Video
-## 🎥 Demo Video
+
 
 ## 🎥 Demo Video
 
 Watch the project demo below:
 
-[▶ Watch Demo Video](./frontend/public/Demo Video.gif)
+[▶ Watch Demo Video] (./frontend/public/Demo Video.gif)
 
 ## ⚙️ Installation & Setup
 
