@@ -33,7 +33,7 @@ Clone of Workjam/
 ├── hr.db                  # SQLite Database
 │
 ├── frontend/
-│   ├── public/
+│   ├── public/            # Photos
 │   │   └── demo.mp4       # Project Demo Video
 │   │
 │   ├── src/
@@ -108,11 +108,21 @@ Clone of Workjam/
 
 
 
-## 🎥 Demo Video
+## 📸 Project Preview
 
-Watch the project demo below:
+### 🏠 Homepage
+<img src="./public/photos/homepage.png" width="900">
 
-[▶ Watch Demo Video] (./frontend/public/Demo Video.gif)
+### 👨‍💼 Employer Dashboard
+<img src="./public/photos/Employer.png" width="900">
+
+### 🛠️ Admin Panel 1
+<img src="./public/photos/admin 1.png" width="900">
+
+### 🛠️ Admin Panel 2
+<img src="./public/photos/admin 2.png" width="900">
+
+
 
 ## ⚙️ Installation & Setup
 
