@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="Style.css">
+</head>
+
+<body>
+
+  <div class="dashboard">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2>HR Panel</h2>
+      <a href="#">Dashboard</a>
+      <a href="#">Employees</a>
+      <a href="#">Shifts</a>
+      <a href="Index.html">Logout</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+
+      <h1>Admin Dashboard 📊</h1>
+
+      <!-- Add Employee -->
+      <div class="card-box">
+        <h3>Add Employee</h3>
+
+        <input type="text" id="empName" placeholder="Employee Name">
+        <input type="text" id="empRole" placeholder="Role (Cashier / Staff)">
+        <button onclick="addEmployee()">Add Employee</button>
+
+        <p id="msg"></p>
+      </div>
+      <div class="card-box">
+  <h3>Shift Requests</h3>
+  <ul id="allRequests"></ul>
+</div>
+
+
+      <!-- Employee List -->
+      <div class="card-box">
+        <h3>Employee List</h3>
+        <ul id="empList"></ul>
+      </div>
+
+      <!-- SHIFT MANAGEMENT (NEW - IMPORTANT) -->
+      <div class="card-box">
+        <h3>Create Shift</h3>
+
+        <select id="shiftEmp"></select>
+
+        <input type="date" id="shiftDate">
+        <input type="time" id="shiftStart">
+        <input type="time" id="shiftEnd">
+
+        <button onclick="addShift()">Assign Shift</button>
+
+        <p id="shiftMsg"></p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="Script.js"></script>
+</body>
+</html>
